@@ -73,16 +73,15 @@ agent = CodeAgent(
     ],
     model=LiteLLMModel(
         model_id="gpt-4o-mini",
-        max_tokens=2096,  # Increased for creative responses
-        temperature=0.6,   # Max creativity
+        max_tokens=1000,  
+        temperature=0.6,
         custom_role_conversions=None,
         api_key=os.environ["OPENAI_TOKEN"],
     ),
-    max_steps=10,  # More steps for complex creations
+    max_steps=10,
     verbosity_level=2
 )
 
-# Example runs
 agent.run(
     "Gotham's villains have hacked the party playlist! Rewrite the 10-song set so each track secretly encodes "
     "a moral lesson for the guests. For every song: give the track, the hidden lesson, and a one-sentence segue "
