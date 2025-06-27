@@ -1,91 +1,98 @@
-from smolagents import CodeAgent, DuckDuckGoSearchTool, LiteLLMModel, VisitWebpageTool, FinalAnswerTool, Tool, tool
+from smolagents import CodeAgent, DuckDuckGoSearchTool, LiteLLMModel, VisitWebpageTool, Tool, tool
 import os
 
 @tool
-def suggest_menu(occasion: str) -> str:
+def suggest_menu_prompt(occasion: str) -> str:
     """
-    Suggests a menu based on the occasion.
+    Generates a creative prompt for the LLM to design a menu.
+
     Args:
-        occasion: The type of occasion for the party.
+        occasion: The type of party or celebration for which the menu should be designed (e.g. "birthday", "holiday brunch").
+
+    Returns:
+        A fully-formatted prompt string that can be provided to the LLM.
     """
-    if occasion == "casual":
-        return "Pizza, snacks, and drinks."
-    elif occasion == "formal":
-        return "3-course dinner with wine and dessert."
-    elif occasion == "superhero":
-        return "Buffet with high-energy and healthy food."
-    else:
-        return "Custom menu for the butler."
+    return f"""
+    Design a creative {occasion} party menu with 5 unique items. 
+    Include: 
+    - 2 savory dishes with creative names 
+    - 2 drinks with thematic ingredients 
+    - 1 dessert with a surprise element
+    Format as: [Dish Name]: [Description] (max 15 words per item)
+    """
 
 @tool
-def catering_service_tool(query: str) -> str:
+def catering_prompt(query: str) -> str:
     """
-    This tool returns the highest-rated catering service in Gotham City.
+    Generates a prompt instructing the LLM to invent imaginative catering services for a specific event.
 
     Args:
-        query: A search term for finding catering services.
+        query: Short description of the customer request or party context (e.g. "vegetarian superhero birthday").
+
+    Returns:
+        A fully-formatted prompt string that can be passed to the LLM.
     """
-    # Example list of catering services and their ratings
-    services = {
-        "Gotham Catering Co.": 4.9,
-        "Wayne Manor Catering": 4.8,
-        "Gotham City Events": 4.7,
-    }
+    return f"""
+    Find 3 imaginative catering services in Gotham for {query}. 
+    For each:
+    - Invent a unique specialty dish
+    - Create a fictional rating (4.5-5.0)
+    - Describe their service style in 10 words
+    Format as: [Name] | [Specialty] | Rating: [X.X] | [Style]
+    """
 
-    # Find the highest rated catering service (simulating search query filtering)
-    best_service = max(services, key=services.get)
-
-    return best_service
-
-class SuperheroPartyThemeTool(Tool):
-    name = "superhero_party_theme_generator"
-    description = """
-    This tool suggests creative superhero-themed party ideas based on a category.
-    It returns a unique party theme idea."""
+class SuperheroThemePromptTool(Tool):
+    name = "superhero_theme_prompt_generator"
+    description = "Generates prompts for creative superhero party themes."
 
     inputs = {
         "category": {
             "type": "string",
-            "description": "The type of superhero party (e.g., 'classic heroes', 'villain masquerade', 'futuristic gotham').",
+            "description": "Party theme category (e.g. 'villain masquerade')",
         }
     }
-
     output_type = "string"
 
-    def forward(self, category: str):
-        themes = {
-            "classic heroes": "Justice League Gala: Guests come dressed as their favorite DC heroes with themed cocktails like 'The Kryptonite Punch'.",
-            "villain masquerade": "Gotham Rogues' Ball: A mysterious masquerade where guests dress as classic Batman villains.",
-            "futuristic gotham": "Neo-Gotham Night: A cyberpunk-style party inspired by Batman Beyond, with neon decorations and futuristic gadgets."
-        }
+    def forward(self, category: str) -> str:
+        return f"""
+        Design a {category} superhero party with:
+        1. A creative theme name
+        2. 3 interactive activities (e.g. "Riddler's puzzle hunt")
+        3. 2 signature cocktails with fun names
+        4. Decor concept in 10 words
+        Format as: [Theme Name]\nActivities: [list]\nCocktails: [list]\nDecor: [description]
+        """
 
-        return themes.get(category.lower(), "Themed party idea not found. Try 'classic heroes', 'villain masquerade', or 'futuristic gotham'.")
-
-
-# Alfred, the butler, preparing the menu for the party
 agent = CodeAgent(
     tools=[
         DuckDuckGoSearchTool(),
         VisitWebpageTool(),
-        suggest_menu,
-        catering_service_tool,
-        SuperheroPartyThemeTool()
-        ],
+        suggest_menu_prompt,
+        catering_prompt,
+        SuperheroThemePromptTool()
+    ],
     model=LiteLLMModel(
         model_id="gpt-4o-mini",
-        max_tokens=2096,
-        temperature=0.5,
+        max_tokens=2096,  # Increased for creative responses
+        temperature=0.6,   # Max creativity
         custom_role_conversions=None,
         api_key=os.environ["OPENAI_TOKEN"],
     ),
-    max_steps=10,
+    max_steps=10,  # More steps for complex creations
     verbosity_level=2
 )
 
-#agent.run("Give me best playlist for a party at the Wayne's mansion. The party idea is a 'villain masquerade' theme. Also prepare a menu for the Batman's enemy party.")
-
+# Example runs
 agent.run(
     "Gotham's villains have hacked the party playlist! Rewrite the 10-song set so each track secretly encodes "
     "a moral lesson for the guests. For every song: give the track, the hidden lesson, and a one-sentence segue "
     "Alfred can use when it plays."
+)
+
+agent.run(
+    "Commission a 3-minute elevator pitch to convince Bruce Wayne that a time-travel-themed charity gala "
+    "will outshine last year's masquerade. Include: (a) a catchy event title, "
+    "(b) three interactive attractions that merge past & future tech, "
+    "(c) a gourmet appetiser menu inspired by each attraction, and "
+    "(d) one killer closing line Alfred can use to seal the deal."
 )
