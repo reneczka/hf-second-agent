@@ -1,0 +1,68 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon files
+Icon?
+
+# Thumbnails
+._*
+ehthumbs.db
+Thumbs.db
+
+# Python artefacts
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.pyd
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# pipenv/poetry
+Pipfile.lock
+poetry.lock
+
+# Logs
+*.log
+
+# Environment & secrets files
+.env
+*.env
+.env.*
+
+# Editor & IDE settings
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Coverage & testing
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+.cache
+pytest_cache/
+
+# Type checker
+.mypy_cache/
+
+# Build tools
+__pypackages__/
+
+# Misc
+*.swp
+*~ 
+example.py
